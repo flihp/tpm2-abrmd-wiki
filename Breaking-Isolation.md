@@ -1,3 +1,10 @@
 One of the core TAB/RM functions outlined in the TCG spec is isolation of client commands. The spec refers to this as 'multi-user support'. In our implementation this effectively means that the TPM2 commands executed over one client connection cannot effect objects in use by another connection.
 
 This property is great but, as always, in practice we find breaking said isolation very useful. This page documents the use-case driving a controlled break in isolation and some options for its implementation. We'll also get into how these various approaches will impact clients.
+
+## Session Continuation
+Isolation places logical barriers between different connections to the `tabrmd`. An object loaded by one connection cannot be subsequently used by a command sent over a different connection. This limitation makes perfect sense for the common case but when two processes want operate on the same object they have an easy work around: A process can save an object before it terminates. When the connection is terminated the `tabrmd` will flush the object context from the TPM, but another process can use the saved object context to reload the saved object context.
+
+The difference between the semantics for managing object and sessions is where the issues arise: A TPM2 object may have its context saved and the object flushed from the TPM and then subsequently reloaded. Unlike a TPM2 object, a saved TPM2 session context cannot be reloaded after it has been flushed. This makes it impossible for a session created by a client connection and saved to be reloaded by another connection since the `tabrmd`, in an attempt to isolate the two connections, flushes the session context.
+
+In practice the result is that command line tools can easily manipulate and use TPM2 objects by saving the object context and passing this data to another process where it can be reloaded and used. They cannot however do the same for sessions. Our ideal end state would be for the developers experience be identical across objects and sessions. How achievable this is will be explored in the following sections.
