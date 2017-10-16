@@ -1,0 +1,3 @@
+One of the core TAB/RM functions outlined in the TCG spec is isolation of client commands. The spec refers to this as 'multi-user support'. In our implementation this effectively means that the TPM2 commands executed over one client connection cannot effect objects in use by another connection.
+
+This property is great but, as always, in practice we find breaking said isolation very useful. This page documents the use-case driving a controlled break in isolation and some options for its implementation. We'll also get into how these various approaches will impact clients.
