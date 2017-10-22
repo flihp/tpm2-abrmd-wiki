@@ -10,3 +10,9 @@ The issue isn't quite as dire as it sounds. Generally we're concerned with TPM2 
 The difference between the semantics for managing object and sessions is where the issues arise: A TPM2 object may have its context saved and the object flushed from the TPM and then subsequently reloaded. Unlike a TPM2 object, a saved TPM2 session context cannot be reloaded after it has been flushed. This makes it impossible for a session created by a client connection and saved to be reloaded by another connection since the `tabrmd`, in an attempt to isolate the two connections, flushes the session context.
 
 In practice the result is that command line tools can easily manipulate and use TPM2 objects by saving the object context and passing this data to another process where it can be reloaded and used. They cannot however do the same for sessions. Our ideal end state would be for the developer experience be identical across objects and sessions. How achievable this is will be explored in the following sections.
+
+## Goals
+Before we get too far into the details it's probably best to state our goals:
+1. Simplicity: Our ideal solution will require nothing of the developer using the API beyond the expected SAPI function calls. Adding to the API to support this feature (increasing complexity) may be necessary, but it's not desirable.
+2. Safe: Our solution should not allow a situation where one client has a negative impact on another. Specifically one client should not be able to prevent another from operating normally (preventing access or exhausting resources).
+3. Predictable: Whatever we implement we want the experience of the developer using the feature to be consistent. Stated another way: a client application should behave the same under all but the most exceptional circumstances.
