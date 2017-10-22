@@ -2,6 +2,8 @@ One of the core TAB/RM functions outlined in the TCG spec is isolation of client
 
 This property is great but, as always, in practice we find breaking said isolation very useful. This page documents the use-case driving a controlled break in isolation and some options for its implementation. We'll also get into how these approaches will impact clients.
 
+For the reader to get the most out of this section is expected that they are familiar with the section titled 'Context Mangemnt' in Part 3 of the TPM specification.
+
 ## Session Continuation
 Isolation places logical barriers between different connections to the `tabrmd`. An object loaded by one connection cannot be subsequently used by a command sent over a different connection. This limitation makes perfect sense for the common case: A process creates or loads an object, creates a session, uses the object and or session for some task, then the connection closes and the process shuts down. But we all know how useful it is for processes to collaborate often times passing data between themselves in a pipeline (shell pipeline processing). A strict adherence to the `isolation` property breaks this prolific software architecture.
 
